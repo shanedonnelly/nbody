@@ -7,7 +7,7 @@
 #
 # Then, build the image with:
 #
-# docker build -f src/main/docker/Dockerfile.jvm -t quarkus/nbody-jvm .
+# sudo docker build -f src/main/docker/Dockerfile.jvm -t quarkus/nbody-jvm .
 #
 # Then run the container using:
 #

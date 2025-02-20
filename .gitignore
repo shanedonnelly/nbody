@@ -1,6 +1,10 @@
 # Gradle
 .gradle/
-build/
+# build/ (by Shane )
+
+# (by Shane )
+build/*
+!build/quarkus-app/
 
 # Eclipse
 .project
