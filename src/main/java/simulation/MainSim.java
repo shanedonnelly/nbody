@@ -1,6 +1,8 @@
 package simulation;
 
 import core.Body;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -9,6 +11,8 @@ import java.util.List;
  * affichant la grille (0 pour noir, 1 pour blanc).
  */
 public class MainSim {
+    private static final Logger logger = LoggerFactory.getLogger(MainSim.class);
+
     public static void main(String[] args) {
         List<Body> bodies = SimulationLogic.createBodies(SimulationLogic.BODY_COUNT);
 
@@ -16,9 +20,9 @@ public class MainSim {
         for (int step = 0; step < 10000; step++) {
             SimulationLogic.simulateStep(bodies);
             String grid = SimulationLogic.buildGrid(bodies);
-            System.out.println("=== État de la simulation, étape " + step + " ===");
-            System.out.print(grid);
-            // Optionnel: ralentir l'affichage
+            logger.info("=== État de la simulation, étape {} ===", step);
+            logger.info("\n{}", grid);
+            // Optional: ralentir l'affichage
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {

@@ -39,13 +39,6 @@ public class SimulationLogic {
         return bodies;
     }
 
-    private static double[] computeForcesX(List<Body> bodies) {
-        return new double[bodies.size()];
-    }
-
-    private static double[] computeForcesY(List<Body> bodies) {
-        return new double[bodies.size()];
-    }
 
     public static void computeForces(List<Body> bodies, double[] fx, double[] fy) {
         for (int i = 0; i < bodies.size(); i++) {
