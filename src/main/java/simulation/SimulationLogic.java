@@ -1,10 +1,13 @@
 package simulation;
 
 import core.Body;
+import jakarta.inject.Singleton;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+@Singleton
 public class SimulationLogic {
     public static final int WIDTH = 40;
     public static final int HEIGHT = 30;
@@ -13,11 +16,20 @@ public class SimulationLogic {
     public static final int BODY_COUNT = 10;
     private static final Random RAND = new Random();
 
+    private static SimulationLogic instance;
+
     private SimulationLogic() {
         // Private constructor to prevent instantiation
     }
 
-    public static List<Body> createBodies(int count) {
+    public static synchronized SimulationLogic getInstance() {
+        if (instance == null) {
+            instance = new SimulationLogic();
+        }
+        return instance;
+    }
+
+    public List<Body> createBodies(int count) {
         List<Body> bodies = new ArrayList<>();
         double centerMass = 5e9;
         bodies.add(new Body(WIDTH / 2.0, HEIGHT / 2.0, 0, 0, centerMass));
@@ -39,8 +51,7 @@ public class SimulationLogic {
         return bodies;
     }
 
-
-    public static void computeForces(List<Body> bodies, double[] fx, double[] fy) {
+    public void computeForces(List<Body> bodies, double[] fx, double[] fy) {
         for (int i = 0; i < bodies.size(); i++) {
             for (int j = i + 1; j < bodies.size(); j++) {
                 Body bi = bodies.get(i);
@@ -60,7 +71,7 @@ public class SimulationLogic {
         }
     }
 
-    public static void updatePositions(List<Body> bodies, double[] fx, double[] fy) {
+    public void updatePositions(List<Body> bodies, double[] fx, double[] fy) {
         for (int i = 0; i < bodies.size(); i++) {
             Body b = bodies.get(i);
             b.setVx(b.getVx() + (fx[i] / b.getMass()) * TIME_STEP);
@@ -70,14 +81,14 @@ public class SimulationLogic {
         }
     }
 
-    public static void simulateStep(List<Body> bodies) {
+    public void simulateStep(List<Body> bodies) {
         double[] fx = new double[bodies.size()];
         double[] fy = new double[bodies.size()];
         computeForces(bodies, fx, fy);
         updatePositions(bodies, fx, fy);
     }
 
-    public static String buildGrid(List<Body> bodies) {
+    public String buildGrid(List<Body> bodies) {
         int[][] grid = new int[HEIGHT][WIDTH];
         for (Body b : bodies) {
             int px = (int) Math.round(b.getX());
