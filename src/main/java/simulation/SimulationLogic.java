@@ -141,7 +141,7 @@ public class SimulationLogic {
                 simulationThread.setDaemon(true);
             }
             simulationThread.start();
-            System.out.println("Simulation started");
+            logger.info("Simulation started");
         }
     }
 
