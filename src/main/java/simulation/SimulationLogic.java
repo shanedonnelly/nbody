@@ -2,10 +2,13 @@ package simulation;
 
 import core.Body;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import websocket.GridWebSocket;
 
 @Singleton
 public class SimulationLogic {
@@ -14,12 +17,42 @@ public class SimulationLogic {
     public static final double G = 6.67430e-8;
     public static final double TIME_STEP = 0.3;
     public static final int BODY_COUNT = 10;
+    public static final double CENTER_MASS = 5e9;
     private static final Random RAND = new Random();
+
+    private static final Logger logger = LoggerFactory.getLogger(SimulationLogic.class);
+
+    private Thread simulationThread;
+    
+    // Utiliser volatile pour garantir la visibilité entre les threads
+    private volatile boolean running = false;
+
+    private List<Body> bodies;
+
+    //functions to delete 10% of the bodies randomly
+    public void deleteBodies() {
+        int toDelete = BODY_COUNT/ 10;
+        for (int i = 0; i < toDelete; i++) {
+            int index = RAND.nextInt(bodies.size());
+            bodies.remove(index);
+        }
+    }
+    //same to add 10% of the bodies randomly
+    public void addBodies() {
+        int toAdd = BODY_COUNT / 10;
+        for (int i = 0; i < toAdd; i++) {
+            bodies.add(createOneBody());
+        }
+    }
+
 
     private static SimulationLogic instance;
 
     private SimulationLogic() {
-        // Private constructor to prevent instantiation
+        bodies = createBodies(BODY_COUNT);
+        // Initialiser le thread sans le démarrer
+        simulationThread = new Thread(this::runSimulationThread, "SimulationThread");
+        simulationThread.setDaemon(true); // Empêche le thread de bloquer l'arrêt de l'application
     }
 
     public static synchronized SimulationLogic getInstance() {
@@ -29,24 +62,111 @@ public class SimulationLogic {
         return instance;
     }
 
+    public static synchronized void initiateInstance() {
+        if (instance == null) {
+            instance = new SimulationLogic();
+        }
+    }
+
+    /**
+     * Méthode à exécuter en continu dans le thread de simulation
+     */
+    private void runSimulationThread() {
+        try {
+            int steps = 0;
+            while (running && !Thread.currentThread().isInterrupted()) {
+
+                try {
+                    steps++;
+                    simulateOneStep();
+                    String grid = getGrid();
+                    // Envoyer la grille à tous les clients connectés
+                    GridWebSocket.broadcast(grid);
+                    //logger.info("Simulating step {}", steps);
+                    //logger.info(grid);
+                    // Ajouter un petit délai pour éviter une utilisation excessive du CPU
+                    Thread.sleep(50);
+                    //Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        } finally {
+            logger.info("Simulation thread stopped");
+        }
+    }
+
+    /**
+     * Démarre le thread de simulation
+     */
+    public synchronized void startSimulation() {
+        if (!running) {
+            running = true;
+            // Si le thread a déjà été lancé et arrêté, il faut en créer un nouveau
+            if (simulationThread == null || !simulationThread.isAlive()) {
+                simulationThread = new Thread(this::runSimulationThread, "SimulationThread");
+                simulationThread.setDaemon(true);
+            }
+            simulationThread.start();
+            System.out.println("Simulation started");
+        }
+    }
+
+    /**
+     * Arrête le thread de simulation de manière propre
+     */
+    public synchronized void stopSimulation() {
+        running = false;
+        if (simulationThread != null && simulationThread.isAlive()) {
+            simulationThread.interrupt();
+            try {
+                // Attendre la fin du thread avec un timeout
+                simulationThread.join(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+               logger.error("Interruption lors de l'attente de l'arrêt: " + e.getMessage());
+            }
+            logger.info("Simulation stopped");
+        }
+    }
+    
+    /**
+     * Vérifie si la simulation est en cours d'exécution
+     */
+    public boolean isRunning() {
+        return running && simulationThread != null && simulationThread.isAlive();
+    }
+
+    // Le reste de votre code reste inchangé
+    public void simulateOneStep() {
+        simulateStep(bodies);
+    }
+
+    public String getGrid() {
+        return buildGrid(bodies);
+    }
+
+
+    public Body createOneBody() {
+        double r = 1 + RAND.nextDouble() * (Math.min(WIDTH, HEIGHT) / 2.0 - 1);
+        double angle = RAND.nextDouble() * 2 * Math.PI;
+        double x = (WIDTH / 2.0) + r * Math.cos(angle);
+        double y = (HEIGHT / 2.0) + r * Math.sin(angle);
+
+        double v = Math.sqrt((G * CENTER_MASS) / (r + 1e-9));
+        double velocityVariation = 0.8 + 0.4 * RAND.nextDouble();
+        double vx = -v * Math.sin(angle) * velocityVariation;
+        double vy = v * Math.cos(angle) * velocityVariation;
+        double mass = 1e6 + RAND.nextDouble() * (1e7 - 1e6);
+        return new Body(x, y, vx, vy, mass);
+    }
     public List<Body> createBodies(int count) {
         List<Body> bodies = new ArrayList<>();
-        double centerMass = 5e9;
-        bodies.add(new Body(WIDTH / 2.0, HEIGHT / 2.0, 0, 0, centerMass));
+        bodies.add(new Body(WIDTH / 2.0, HEIGHT / 2.0, 0, 0, CENTER_MASS));
 
         for (int i = 0; i < count - 1; i++) {
-            double r = 1 + RAND.nextDouble() * (Math.min(WIDTH, HEIGHT) / 2.0 - 1);
-            double angle = RAND.nextDouble() * 2 * Math.PI;
-            double x = (WIDTH / 2.0) + r * Math.cos(angle);
-            double y = (HEIGHT / 2.0) + r * Math.sin(angle);
-
-            double v = Math.sqrt((G * centerMass) / (r + 1e-9));
-            double velocityVariation = 0.8 + 0.4 * RAND.nextDouble();
-            double vx = -v * Math.sin(angle) * velocityVariation;
-            double vy = v * Math.cos(angle) * velocityVariation;
-            double mass = 1e6 + RAND.nextDouble() * (1e7 - 1e6);
-
-            bodies.add(new Body(x, y, vx, vy, mass));
+            bodies.add(createOneBody());
         }
         return bodies;
     }

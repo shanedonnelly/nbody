@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
-
+/*
 @ApplicationScoped
 @WebSocket(path = "/click-client")
 public class ClickClientWebSocket {
@@ -56,3 +56,5 @@ public class ClickClientWebSocket {
         return message;
     }
 }
+
+ */
