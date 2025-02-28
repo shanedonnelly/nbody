@@ -10,16 +10,17 @@ import java.util.List;
  * Point d'entrée de la simulation N-corps en mode texte,
  * affichant la grille (0 pour noir, 1 pour blanc).
  */
-public class MainSim {
-    private static final Logger logger = LoggerFactory.getLogger(MainSim.class);
+public class SimulationTest {
+    private static final Logger logger = LoggerFactory.getLogger(SimulationTest.class);
 
-    public static void main(String[] args) {
-        List<Body> bodies = SimulationLogic.createBodies(SimulationLogic.BODY_COUNT);
+    public static void testSim() {
+        SimulationLogic simulationLogic = SimulationLogic.getInstance();
+        List<Body> bodies = simulationLogic.createBodies(SimulationLogic.BODY_COUNT);
 
         // Exécute plusieurs pas de simulation, en affichant la grille à chaque fois
         for (int step = 0; step < 10000; step++) {
-            SimulationLogic.simulateStep(bodies);
-            String grid = SimulationLogic.buildGrid(bodies);
+            simulationLogic.simulateStep(bodies);
+            String grid = simulationLogic.buildGrid(bodies);
             logger.info("=== État de la simulation, étape {} ===", step);
             logger.info("\n{}", grid);
             // Optional: ralentir l'affichage
@@ -29,5 +30,10 @@ public class MainSim {
                 Thread.currentThread().interrupt();
             }
         }
+
+    }
+
+    public static void main(String[] args) {
+        testSim();
     }
 }
