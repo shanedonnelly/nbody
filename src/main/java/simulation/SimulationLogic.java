@@ -16,17 +16,16 @@ public class SimulationLogic {
     public static final int BODY_COUNT = 10;
     private static final Random RAND = new Random();
 
-    private static SimulationLogic instance;
-
     private SimulationLogic() {
         // Private constructor to prevent instantiation
     }
 
-    public static synchronized SimulationLogic getInstance() {
-        if (instance == null) {
-            instance = new SimulationLogic();
-        }
-        return instance;
+    private static class Holder {
+        private static final SimulationLogic INSTANCE = new SimulationLogic();
+    }
+
+    public static SimulationLogic getInstance() {
+        return Holder.INSTANCE;
     }
 
     public List<Body> createBodies(int count) {
