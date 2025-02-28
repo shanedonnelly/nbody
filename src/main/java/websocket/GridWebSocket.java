@@ -47,13 +47,26 @@ public class GridWebSocket {
         // Envoyer à tous les clients
         for (WebSocketConnection conn : connections.values()) {
             try {
-                logger.info("Envoi du message au client {}", conn.id());
+                //logger.info("Envoi du message au client {}", conn.id());
                 conn.sendTextAndAwait(message);
             } catch (Exception e) {
                 logger.error("Erreur lors de l'envoi au client {}: {}", conn.id(), e.getMessage());
             }
         }
     }
+
+    // Modifier la méthode runSimulationThread dans SimulationLogic ou ajouter cette méthode
+    public static void broadcastBinary(byte[] data) {
+        for (WebSocketConnection conn : connections.values()) {
+            try {
+                conn.sendBinaryAndAwait(data);
+            } catch (Exception e) {
+                logger.error("Erreur lors de l'envoi binaire au client {}: {}", conn.id(), e.getMessage());
+            }
+        }
+    }
+
+
 
     @OnTextMessage
     public void onMessage(String message) {
