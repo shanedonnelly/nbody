@@ -31,18 +31,29 @@ public class SimulationLogic {
 
     //functions to delete 10% of the bodies randomly
     public void deleteBodies() {
+        logger.info("Deleting bodies");
         int toDelete = BODY_COUNT/ 10;
-        for (int i = 0; i < toDelete; i++) {
-            int index = RAND.nextInt(bodies.size());
-            bodies.remove(index);
+        if (bodies.size() <= toDelete) {
+            logger.info("there is not enough bodies to delete");
+            return;
         }
+        else{
+            for (int i = 0; i < toDelete; i++) {
+                int index = RAND.nextInt(bodies.size());
+                bodies.remove(index);
+            }
+        }
+
+        logger.info("there is now {} bodies", bodies.size());
     }
     //same to add 10% of the bodies randomly
     public void addBodies() {
+        logger.info("Adding bodies");
         int toAdd = BODY_COUNT / 10;
         for (int i = 0; i < toAdd; i++) {
             bodies.add(createOneBody());
         }
+        logger.info("there is now {} bodies", bodies.size());
     }
 
 
