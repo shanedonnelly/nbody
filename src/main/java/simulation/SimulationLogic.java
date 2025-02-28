@@ -28,8 +28,7 @@ public class SimulationLogic {
     // Paramètres de distribution
     public static final double GALAXY_RADIUS = Math.min(WIDTH, HEIGHT) * 0.4; // Rayon maximal de la galaxie
     public static final double SPIRAL_FACTOR = 0.3; // Facteur pour créer un effet de spirale
-    public static final double THICKNESS_FACTOR = 0.05; // Épaisseur du disque galactique (z-axis)
-    
+
     // Paramètres de dynamique
     public static final double VELOCITY_DISPERSION = 0.2; // Variation dans les vitesses orbitales (0-1)
     public static final double MASS_MIN = 1e5;  // Masse minimale des corps
