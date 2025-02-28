@@ -117,7 +117,7 @@ public class SimulationLogic {
                     //logger.info("Simulating step {}", steps);
                     //logger.info(grid);
                     // Ajouter un petit délai pour éviter une utilisation excessive du CPU
-                    Thread.sleep(150);
+                    Thread.sleep(250);
                     //Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();

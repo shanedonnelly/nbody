@@ -1,3 +1,6 @@
+./gradlew clean build
+java -jar build/quarkus-app/quarkus-run.jar
+
 sudo docker build -f src/main/docker/Dockerfile.jvm -t quarkus/nbody-jvm .
 sudo docker run -i --rm -p 8080:8080 quarkus/nbody-jvm
 
