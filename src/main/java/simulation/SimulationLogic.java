@@ -57,6 +57,10 @@ public class SimulationLogic {
         else{
             for (int i = 0; i < toDelete; i++) {
                 int index = RAND.nextInt(bodies.size());
+                if(index == 0){
+                    i--;
+                    continue;
+                }
                 bodies.remove(index);
             }
         }
