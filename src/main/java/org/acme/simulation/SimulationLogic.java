@@ -12,6 +12,7 @@ import org.acme.websocket.GridWebSocket;
 
 @Singleton
 public class SimulationLogic {
+
     // Dimensions de la grille
     public static final int WIDTH = 200;
     public static final int HEIGHT = 200;
@@ -28,8 +29,7 @@ public class SimulationLogic {
     // Paramètres de distribution
     public static final double GALAXY_RADIUS = Math.min(WIDTH, HEIGHT) * 0.4; // Rayon maximal de la galaxie
     public static final double SPIRAL_FACTOR = 0.3; // Facteur pour créer un effet de spirale
-    public static final double THICKNESS_FACTOR = 0.05; // Épaisseur du disque galactique (z-axis)
-    
+
     // Paramètres de dynamique
     public static final double VELOCITY_DISPERSION = 0.2; // Variation dans les vitesses orbitales (0-1)
     public static final double MASS_MIN = 1e5;  // Masse minimale des corps
@@ -44,24 +44,26 @@ public class SimulationLogic {
     // Utiliser volatile pour garantir la visibilité entre les threads
     private volatile boolean running = false;
 
-    private List<Body> bodies;
+    private final List<Body> bodies;
 
     //functions to delete 10% of the bodies randomly
     public void deleteBodies() {
         logger.info("Deleting bodies");
-        int toDelete = BODY_COUNT/ 10;
+        int toDelete = BODY_COUNT / 10;
         if (bodies.size() <= toDelete) {
             logger.info("there is not enough bodies to delete");
             return;
-        }
-        else{
-            for (int i = 0; i < toDelete; i++) {
+        } else {
+            int deletedCount = 0;
+            while (deletedCount < toDelete) {
                 int index = RAND.nextInt(bodies.size());
-                bodies.remove(index);
+                if (index != 0) {
+                    bodies.remove(index);
+                    deletedCount++;
+                }
             }
         }
-
-        logger.info("there is now {} bodies", bodies.size());
+        logger.info("there is now {} bodies after delete", bodies.size());
     }
     //same to add 10% of the bodies randomly
     public void addBodies() {
@@ -70,7 +72,7 @@ public class SimulationLogic {
         for (int i = 0; i < toAdd; i++) {
             bodies.add(createOneBody());
         }
-        logger.info("there is now {} bodies", bodies.size());
+        logger.info("there is now {} bodies after add", bodies.size());
     }
 
 
@@ -90,35 +92,24 @@ public class SimulationLogic {
         return instance;
     }
 
-    public static synchronized void initiateInstance() {
-        if (instance == null) {
-            instance = new SimulationLogic();
-        }
-    }
+
 
     /**
-     * Méthode à exécuter en continu dans le thread de org.acme.simulation
+     * Méthode à exécuter en continu dans le thread org.acme.simulation
      */
     private void runSimulationThread() {
         try {
-            int steps = 0;
             while (running && !Thread.currentThread().isInterrupted()) {
 
                 try {
-                    steps++;
                     simulateOneStep();
-                    //String grid = getGrid();
-                    // Envoyer la grille à tous les clients connectés
-                    //GridWebSocket.broadcast(grid);
-                    // Envoyer la grille sous forme binaire
+
+                    // Envoyer la grille sous forme binaire à tous les clients connectés
                     byte[] gridBinary = getGridBinary();
                     GridWebSocket.broadcastBinary(gridBinary);
 
-                    //logger.info("Simulating step {}", steps);
-                    //logger.info(grid);
                     // Ajouter un petit délai pour éviter une utilisation excessive du CPU
-                    Thread.sleep(150);
-                    //Thread.sleep(5000);
+                    Thread.sleep(250);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
@@ -146,7 +137,7 @@ public class SimulationLogic {
     }
 
     /**
-     * Arrête le thread de org.acme.simulation de manière propre
+     * Arrête le thread org.acme.simulation de manière propre
      */
     public synchronized void stopSimulation() {
         running = false;
@@ -157,8 +148,7 @@ public class SimulationLogic {
                 simulationThread.join(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-               logger.error("Interruption lors de l'attente de l'arrêt: " + e.getMessage());
-            }
+                logger.error("Interruption lors de l'attente de l'arrêt", e);            }
             logger.info("Simulation stopped");
         }
     }
@@ -175,9 +165,6 @@ public class SimulationLogic {
         simulateStep(bodies);
     }
 
-    public String getGrid() {
-        return buildGrid(bodies);
-    }
 
         // Ajouter cette méthode pour générer une représentation binaire de la grille
     public byte[] getGridBinary() {
@@ -190,7 +177,7 @@ public class SimulationLogic {
             }
         }
     
-        // Compression: 8 cellules par octet (1 bit par cellule)
+        // Compression : 8 cellules par octet (1 bit par cellule)
         int bytesPerRow = (WIDTH + 7) / 8;
         byte[] result = new byte[HEIGHT * bytesPerRow];
         
@@ -216,7 +203,6 @@ public Body createOneBody() {
     double spiralOffset = SPIRAL_FACTOR * r;
     angle += spiralOffset;
     
-    // Position avec légère variation sur l'axe z (épaisseur du disque)
     double x = (WIDTH / 2.0) + r * Math.cos(angle);
     double y = (HEIGHT / 2.0) + r * Math.sin(angle);
     
@@ -234,12 +220,12 @@ public Body createOneBody() {
     return new Body(x, y, vx, vy, mass);
 }
     public List<Body> createBodies(int count) {
-        List<Body> bodies = new ArrayList<>();
-        bodies.add(new Body(WIDTH / 2.0, HEIGHT / 2.0, 0, 0, CENTER_MASS));
+        List<Body> newbodies = new ArrayList<>();
+        newbodies.add(new Body(WIDTH / 2.0, HEIGHT / 2.0, 0, 0, CENTER_MASS));
         for (int i = 0; i < count - 1; i++) {
-            bodies.add(createOneBody());
+            newbodies.add(createOneBody());
         }
-        return bodies;
+        return newbodies;
     }
 
     public void computeForces(List<Body> bodies, double[] fx, double[] fy) {
@@ -298,4 +284,7 @@ public Body createOneBody() {
         }
         return sb.toString();
     }
+     public List<Body> getBodies() {
+         return bodies;
+     }
 }

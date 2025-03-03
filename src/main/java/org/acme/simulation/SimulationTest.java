@@ -1,6 +1,6 @@
-package simulation;
+package org.acme.simulation;
 
-import core.Body;
+import org.acme.core.Body;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

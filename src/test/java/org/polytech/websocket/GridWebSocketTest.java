@@ -6,8 +6,11 @@ import org.acme.simulation.SimulationLogic;
 import org.acme.websocket.GridWebSocket;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import java.lang.reflect.Field;
@@ -18,11 +21,13 @@ class GridWebSocketTest {
     private GridWebSocket gridWebSocket;
     private SimulationLogic simulationLogicMock;
     private WebSocketConnection connectionMock;
+    private Logger loggerMock;
 
     @BeforeEach
     public void setup() throws NoSuchFieldException, IllegalAccessException {
         simulationLogicMock = mock(SimulationLogic.class);
         connectionMock = mock(WebSocketConnection.class);
+        loggerMock = mock(Logger.class);
 
         gridWebSocket = new GridWebSocket();
 
@@ -30,7 +35,13 @@ class GridWebSocketTest {
         simulationLogicField.setAccessible(true);
         simulationLogicField.set(null, simulationLogicMock);
 
+        Field connectionsField = GridWebSocket.class.getDeclaredField("connections");
+        connectionsField.setAccessible(true);
+        connectionsField.set(null, new ConcurrentHashMap<>());
 
+        Field loggerField = GridWebSocket.class.getDeclaredField("logger");
+        loggerField.setAccessible(true);
+        loggerField.set(null, loggerMock);
     }
 
     @Test
@@ -40,6 +51,7 @@ class GridWebSocketTest {
         gridWebSocket.onOpen(connectionMock);
 
         assertTrue(getConnections().containsKey("123"));
+        verify(loggerMock).info("Connexion établie avec un client: {}", "123");
     }
 
     @Test
@@ -50,6 +62,7 @@ class GridWebSocketTest {
         gridWebSocket.onClose(connectionMock);
 
         assertFalse(getConnections().containsKey("123"));
+        verify(loggerMock).info("Connexion fermée avec le client: {}", "123");
     }
 
     @Test
