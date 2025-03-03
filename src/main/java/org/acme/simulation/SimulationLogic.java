@@ -296,7 +296,7 @@ public Body createOneBody() {
      * Génère une représentation binaire des positions des corps au lieu de la grille entière
      */
     public byte[] getBodyPositionsBinary() {
-        // Format: nombre de corps (4 bytes) + (x, y) pour chaque corps (2 x 2 bytes par corps)
+        // Format : nombre de corps (4 bytes) + (x, y) pour chaque corps (2 x 2 bytes par corps)
         byte[] result = new byte[4 + bodies.size() * 4];
         
         // Nombre de corps (int = 4 bytes)
@@ -312,7 +312,7 @@ public Body createOneBody() {
             int x = (int) Math.round(b.getX());
             int y = (int) Math.round(b.getY());
             
-            // Chaque coordonnée prend 2 bytes (short)
+            // Chaque coordonnée prend deux bytes (short).
             result[4 + i*4] = (byte) ((x >> 8) & 0xFF);
             result[4 + i*4 + 1] = (byte) (x & 0xFF);
             result[4 + i*4 + 2] = (byte) ((y >> 8) & 0xFF);

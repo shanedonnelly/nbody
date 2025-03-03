@@ -25,15 +25,17 @@ public class GridWebSocket {
 
     @OnOpen
     public void onOpen(WebSocketConnection connection) {
-        logger.info("Connexion établie avec un client: {}", connection.id());
-        // Add the connection to the map
+        if (logger.isInfoEnabled()) {
+            logger.info("Connexion établie avec un client: {}", connection.id());
+        }
         connections.put(connection.id(), connection);
     }
 
     @OnClose
     public void onClose(WebSocketConnection connection) {
-        logger.info("Connexion fermée avec le client: {}", connection.id());
-        // Remove the connection from the map
+        if (logger.isInfoEnabled()) {
+            logger.info("Connexion fermée avec le client: {}", connection.id());
+        }
         connections.remove(connection.id());
     }
 
@@ -64,14 +66,12 @@ public class GridWebSocket {
     @OnTextMessage
     public void onMessage(String message) {
         logger.info("Message reçu : {}", message);
-        if(message.equals("start")) {
-            simulationLogic.startSimulation();
-        } else if(message.equals("stop")) {
-            simulationLogic.stopSimulation();
-        } else if (message.equals("add")) {
-            simulationLogic.addBodies();
-        } else if (message.equals("delete")) {
-            simulationLogic.deleteBodies();
+        switch (message) {
+            case "start" -> simulationLogic.startSimulation();
+            case "stop" -> simulationLogic.stopSimulation();
+            case "add" -> simulationLogic.addBodies();
+            case "delete" -> simulationLogic.deleteBodies();
+            default -> logger.warn("Message inconnu reçu : {}", message);
         }
     }
 }
