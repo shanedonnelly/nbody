@@ -1,6 +1,6 @@
-package simulation;
+package org.acme.simulation;
 
-import core.Body;
+import org.acme.core.Body;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import websocket.GridWebSocket;
+import org.acme.websocket.GridWebSocket;
 
 @Singleton
 public class SimulationLogic {
@@ -22,7 +22,7 @@ public class SimulationLogic {
     public static final double TIME_STEP = 0.1; // Pas de temps plus petit pour plus de précision
     
     // Paramètres de la galaxie
-    public static final int BODY_COUNT = 300;   // Plus de corps pour une simulation plus riche
+    public static final int BODY_COUNT = 300;   // Plus de corps pour une org.acme.simulation plus riche
     public static final double CENTER_MASS = 2e10; // Masse centrale plus importante (trou noir supermassif)
     
     // Paramètres de distribution
@@ -97,7 +97,7 @@ public class SimulationLogic {
     }
 
     /**
-     * Méthode à exécuter en continu dans le thread de simulation
+     * Méthode à exécuter en continu dans le thread de org.acme.simulation
      */
     private void runSimulationThread() {
         try {
@@ -130,7 +130,7 @@ public class SimulationLogic {
     }
 
     /**
-     * Démarre le thread de simulation
+     * Démarre le thread de org.acme.simulation
      */
     public synchronized void startSimulation() {
         if (!running) {
@@ -146,7 +146,7 @@ public class SimulationLogic {
     }
 
     /**
-     * Arrête le thread de simulation de manière propre
+     * Arrête le thread de org.acme.simulation de manière propre
      */
     public synchronized void stopSimulation() {
         running = false;
@@ -164,7 +164,7 @@ public class SimulationLogic {
     }
     
     /**
-     * Vérifie si la simulation est en cours d'exécution
+     * Vérifie si la org.acme.simulation est en cours d'exécution
      */
     public boolean isRunning() {
         return running && simulationThread != null && simulationThread.isAlive();

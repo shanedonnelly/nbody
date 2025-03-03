@@ -1,8 +1,8 @@
 package org.polytech.simulation;
 
-import core.Body;
+import org.acme.core.Body;
 import org.junit.jupiter.api.Test;
-import simulation.SimulationLogic;
+import org.acme.simulation.SimulationLogic;
 
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;

@@ -1,10 +1,11 @@
+package org.acme;
 
 import io.quarkus.runtime.QuarkusApplication;
 import io.quarkus.runtime.annotations.QuarkusMain;
 import io.quarkus.runtime.Quarkus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import simulation.SimulationLogic;
+import org.acme.simulation.SimulationLogic;
 
 
 @QuarkusMain

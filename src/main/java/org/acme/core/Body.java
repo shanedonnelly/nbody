@@ -1,4 +1,4 @@
-package core;
+package org.acme.core;
 
 /**
  * Represents a particle (body) with position, velocity, and mass.

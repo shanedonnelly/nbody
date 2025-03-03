@@ -1,4 +1,4 @@
-package com.example;
+package org.acme.com.example;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

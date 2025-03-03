@@ -1,15 +1,5 @@
-package com.example;
+package org.acme.com.example;
 
-import io.quarkus.websockets.next.OnOpen;
-import io.quarkus.websockets.next.OnTextMessage;
-import io.quarkus.websockets.next.WebSocket;
-import io.quarkus.websockets.next.WebSocketConnection;
-import jakarta.enterprise.context.ApplicationScoped;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
 /*
 @ApplicationScoped
 @WebSocket(path = "/click-client")

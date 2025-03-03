@@ -1,6 +1,6 @@
 package org.polytech.core;
 
-import core.Body;
+import org.acme.core.Body;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 

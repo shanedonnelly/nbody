@@ -81,8 +81,8 @@ const updateGrid = (data) => {
 // Connexion à la WebSocket
 const connectWebSocket = () => {
   // const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-  // const wsUrl = `${protocol}//${window.location.host}/websocket`
-  const wsUrl = 'ws://localhost:8080/websocket'
+  // const wsUrl = `${protocol}//${window.location.host}/org.acme.websocket`
+  const wsUrl = 'ws://localhost:8080/org.acme.websocket'
   
   socket = new WebSocket(wsUrl)
   
