@@ -26,16 +26,11 @@ class GridWebSocketTest {
 
         gridWebSocket = new GridWebSocket();
 
-        // Set the mock SimulationLogic
         Field simulationLogicField = GridWebSocket.class.getDeclaredField("simulationLogic");
         simulationLogicField.setAccessible(true);
         simulationLogicField.set(null, simulationLogicMock);
 
-        // Clear the existing connections map
-        Map<String, WebSocketConnection> connections = getConnections();
-        connections.clear();
 
-        // We can't mock the logger as it's final, so we'll skip that part
     }
 
     @Test
@@ -45,7 +40,6 @@ class GridWebSocketTest {
         gridWebSocket.onOpen(connectionMock);
 
         assertTrue(getConnections().containsKey("123"));
-        // Can't verify logger interactions
     }
 
     @Test
@@ -56,7 +50,6 @@ class GridWebSocketTest {
         gridWebSocket.onClose(connectionMock);
 
         assertFalse(getConnections().containsKey("123"));
-        // Can't verify logger interactions
     }
 
     @Test
