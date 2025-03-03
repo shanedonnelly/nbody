@@ -14,7 +14,7 @@ import org.acme.websocket.GridWebSocket;
 public class SimulationLogic {
 
     // Dimensions de la grille
-    public static final int WIDTH = 200;
+    public static final int WIDTH = 400;
     public static final int HEIGHT = 200;
 
     
@@ -23,7 +23,7 @@ public class SimulationLogic {
     public static final double TIME_STEP = 0.1; // Pas de temps plus petit pour plus de précision
     
     // Paramètres de la galaxie
-    public static final int BODY_COUNT = 300;   // Plus de corps pour une org.acme.simulation plus riche
+    public static final int BODY_COUNT = 180;   // Plus de corps pour une org.acme.simulation plus riche
     public static final double CENTER_MASS = 2e10; // Masse centrale plus importante (trou noir supermassif)
     
     // Paramètres de distribution
@@ -69,6 +69,10 @@ public class SimulationLogic {
     public void addBodies() {
         logger.info("Adding bodies");
         int toAdd = BODY_COUNT / 10;
+        if(bodies.size() >= 3 * BODY_COUNT) {
+            logger.info("there is too much bodies to add");
+            return;
+        }
         for (int i = 0; i < toAdd; i++) {
             bodies.add(createOneBody());
         }
@@ -97,29 +101,27 @@ public class SimulationLogic {
     /**
      * Méthode à exécuter en continu dans le thread org.acme.simulation
      */
-    private void runSimulationThread() {
-        try {
-            while (running && !Thread.currentThread().isInterrupted()) {
+   private void runSimulationThread() {
+    try {
+        while (running && !Thread.currentThread().isInterrupted()) {
+            try {
+                simulateOneStep();
 
-                try {
-                    simulateOneStep();
+                // Envoyer les positions des corps au lieu de la grille
+                byte[] positionsBinary = getBodyPositionsBinary();
+                GridWebSocket.broadcastBinary(positionsBinary);
 
-                    // Envoyer la grille sous forme binaire à tous les clients connectés
-                    byte[] gridBinary = getGridBinary();
-                    GridWebSocket.broadcastBinary(gridBinary);
-
-                    // Ajouter un petit délai pour éviter une utilisation excessive du CPU
-                    Thread.sleep(250);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
+                // Ajouter un petit délai pour éviter une utilisation excessive du CPU
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
-        } finally {
-            logger.info("Simulation thread stopped");
         }
+    } finally {
+        logger.info("Simulation thread stopped");
     }
-
+}
     /**
      * Démarre le thread de org.acme.simulation
      */
@@ -135,6 +137,8 @@ public class SimulationLogic {
             logger.info("Simulation started");
         }
     }
+
+
 
     /**
      * Arrête le thread org.acme.simulation de manière propre
@@ -287,4 +291,34 @@ public Body createOneBody() {
      public List<Body> getBodies() {
          return bodies;
      }
+
+         /**
+     * Génère une représentation binaire des positions des corps au lieu de la grille entière
+     */
+    public byte[] getBodyPositionsBinary() {
+        // Format: nombre de corps (4 bytes) + (x, y) pour chaque corps (2 x 2 bytes par corps)
+        byte[] result = new byte[4 + bodies.size() * 4];
+        
+        // Nombre de corps (int = 4 bytes)
+        int bodyCount = bodies.size();
+        result[0] = (byte) ((bodyCount >> 24) & 0xFF);
+        result[1] = (byte) ((bodyCount >> 16) & 0xFF);
+        result[2] = (byte) ((bodyCount >> 8) & 0xFF);
+        result[3] = (byte) (bodyCount & 0xFF);
+        
+        // Coordonnées de chaque corps
+        for (int i = 0; i < bodies.size(); i++) {
+            Body b = bodies.get(i);
+            int x = (int) Math.round(b.getX());
+            int y = (int) Math.round(b.getY());
+            
+            // Chaque coordonnée prend 2 bytes (short)
+            result[4 + i*4] = (byte) ((x >> 8) & 0xFF);
+            result[4 + i*4 + 1] = (byte) (x & 0xFF);
+            result[4 + i*4 + 2] = (byte) ((y >> 8) & 0xFF);
+            result[4 + i*4 + 3] = (byte) (y & 0xFF);
+        }
+        
+        return result;
+    }
 }
