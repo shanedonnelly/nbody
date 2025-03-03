@@ -1,4 +1,4 @@
-package core;
+package org.acme.core;
 
 /**
  * Represents a particle (body) with position, velocity, and mass.
@@ -11,6 +11,9 @@ public class Body {
     private double mass;
 
     public Body(double x, double y, double vx, double vy, double mass) {
+        if (mass < 0) {
+            throw new IllegalArgumentException("Mass cannot be negative");
+        }
         this.x = x;
         this.y = y;
         this.vx = vx;
@@ -55,6 +58,11 @@ public class Body {
     }
 
     public void setMass(double mass) {
+        if (mass < 0) {
+            throw new IllegalArgumentException("Mass cannot be negative");
+        }
+        else {
         this.mass = mass;
+        }
     }
 }
